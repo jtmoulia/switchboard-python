@@ -6,7 +6,7 @@ import switchboard
 import argparse
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 HOSTS = {'localhost': 'ws://127.0.0.1:8080/workers'}
@@ -78,7 +78,7 @@ def main(sid, token, to, from_, url):
         worker.close()
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Loop echo listener")
+    parser = argparse.ArgumentParser(description="Switchboard Twilio Worker")
     parser.add_argument('--host', help="the name of the host (see HOSTS)")
     parser.add_argument('--sid', required=True, help="the twilio sid")
     parser.add_argument('--token', required=True, help="the twilio token")

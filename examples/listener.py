@@ -75,6 +75,6 @@ def main(url):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Loop echo listener")
-    parser.add_argument("host")
+    parser.add_argument("--host", default="localhost")
     args = parser.parse_args()
     main(HOSTS[args.host])

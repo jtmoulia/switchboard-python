@@ -1,28 +1,30 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+APNSWorker is a Switchboard worker that collects incoming emails,
+uses them to create a push notification, and then sends them to
+an iOS device.
+
+    ./apnsworker.py --help
+"""
+
 import apns
 import switchboard
 import argparse
 
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 HOSTS = {'localhost': 'ws://127.0.0.1:8080/workers'}
-
-## These are example parameters, replace them with real values
-# The APNS hex token to send push notifications to.
-HEX_TOKEN = 'b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b87'
-
-# The arguments used to start the APNS connection
-APNS_ARGS = {
-    'use_sandbox': True,
-    'cert_file': 'cert.pem',
-    'key_file': 'key.pem'}
-
-# Flip this to True to allow the worker to send push notifications
-SEND_APNS = True
+ACCOUNT = 'mail.dispatch.test@gmail.com'
+CONN_SPEC = {'host': 'imap.gmail.com',
+             'port': 993,
+             'auth': {
+                 'type': 'plain',
+                 'username': ACCOUNT,
+                 'password': 'i>V99JuMVEs;'}};
 
 
 class APNSWorker(switchboard.Client):
@@ -31,9 +33,10 @@ class APNSWorker(switchboard.Client):
     form it into a push notification, and send it to the client.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, cert, key, pushtoken=None, use_sandbox=True, *args, **kwargs):
         super(APNSWorker, self).__init__(*args, **kwargs)
-        self._apns = apns.APNs(**APNS_ARGS)
+        self._pushtoken = pushtoken
+        self._apns = apns.APNs(use_sandbox=use_sandbox, cert_file=cert, key_file=key)
 
     def connect(self):
         """Connect to the websocket, and ensure the account is connected and
@@ -45,26 +48,34 @@ class APNSWorker(switchboard.Client):
             """Post setup callback."""
             logger.info("Setup complete, listening...")
 
-        self.send_cmds(('watchAll', {})).then(post_setup)
+        self.send_cmds(('connect', CONN_SPEC),
+                       ('watchMailboxes', {'account': ACCOUNT,
+                                           'list': ['INBOX']}),
+                       ('watchAll', {})).then(post_setup)
 
     def received_unsolicited(self, resps):
         def post_fetch((cmds, resps)):
             """Post fetch callback."""
-            for msg in resps[0][1]['list']:
-                logger.debug("Preparing msg to send: %s", msg)
-                from1 = msg['from'][0]
-                from_name = from1.get('name') or from1.get('email', '<unknown>')
-                notification = "%s - %s" % (from_name, msg['subject'])
-                payload = apns.Payload(notification, sound='default', badge=1)
-                if SEND_APNS:
-                    logger.debug("sending push notification: %s", payload)
-                    try:
-                        self._apns.gateway_server.send_notification(HEX_TOKEN, payload)
-                    except Exception as e:
-                        logger.error("Error sending push notification: %s", e)
-                        raise
-                else:
-                    logger.info("-- push notification would be sent: %s --", payload)
+            try:
+                for msg in resps[0][1]['list']:
+                    logger.debug("Preparing msg to send: %s", msg)
+                    from1 = msg['from'][0]
+                    from_name = from1.get('name') or from1.get('email', '<unknown>')
+                    notification = "%s - %s" % (from_name, msg['subject'])
+                    payload = apns.Payload(notification, sound='default', badge=1)
+                    if self._pushtoken:
+                        logger.info("Sending push notification: %s", payload)
+                        try:
+                            self._apns.gateway_server.send_notification(
+                                self._pushtoken, payload)
+                        except Exception as e:
+                            logger.error("Error sending push notification: %s", e)
+                            raise
+                    else:
+                        logger.info("-- push notification would be sent: %s --", payload)
+            except Exception as e:
+                logger.error("Error: %s", e)
+                raise
 
         for resp in resps:
             if resp[0] == 'newMessage':
@@ -79,17 +90,20 @@ class APNSWorker(switchboard.Client):
 
 
 
-def main(url):
+def main(cert, key, pushtoken, url):
     """Create, connect, and block on the listener worker."""
     try:
-        worker = APNSWorker(url)
+        worker = APNSWorker(cert=cert, key=key, pushtoken=pushtoken, url=url)
         worker.connect()
         worker.run_forever()
     except KeyboardInterrupt:
         worker.close()
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Loop echo listener")
-    parser.add_argument("--host")
+    parser = argparse.ArgumentParser(description="APNS Worker")
+    parser.add_argument("--cert", default="cert.pem")
+    parser.add_argument("--key", default="key.pem")
+    parser.add_argument("--pushtoken", default=None)
+    parser.add_argument("--host", default="localhost")
     args = parser.parse_args()
-    main(HOSTS[args.host])
+    main(args.cert, args.key, args.pushtoken, HOSTS[args.host])

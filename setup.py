@@ -11,4 +11,4 @@ setup(name='switchboard',
       license='license.txt',
       packages=['switchboard'],
       install_requires=['ws4py == 0.3.4'],
-      test_suite = 'test.test_switchboard')
+      test_suite='test.test_switchboard')
