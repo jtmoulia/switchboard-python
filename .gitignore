@@ -1,0 +1,4 @@
+build
+switchboard.egg-info
+
+*.pyc
