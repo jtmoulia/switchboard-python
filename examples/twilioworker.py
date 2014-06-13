@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import apns
+import twilio.rest
 import switchboard
 import argparse
 
@@ -10,16 +10,6 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 HOSTS = {'localhost': 'ws://127.0.0.1:8080/workers'}
-
-## These are example parameters, replace them with real values
-# The APNS hex token to send push notifications to.
-HEX_TOKEN = 'b5bb9d8014a0f9b1d61e21e796d78dccdf1352f23cd32812f4850b87'
-
-# The arguments used to start the APNS connection
-APNS_ARGS = {
-    'use_sandbox': True,
-    'cert_file': 'cert.pem',
-    'key_file': 'key.pem'}
 
 # Flip this to True to allow the worker to send push notifications
 SEND_APNS = True
@@ -31,9 +21,11 @@ class APNSWorker(switchboard.Client):
     form it into a push notification, and send it to the client.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, sid, token, to, from_, *args, **kwargs):
         super(APNSWorker, self).__init__(*args, **kwargs)
-        self._apns = apns.APNs(**APNS_ARGS)
+        self._to = to
+        self._from = from_
+        self._twilio = twilio.rest.TwilioRestClient(sid, token)
 
     def connect(self):
         """Connect to the websocket, and ensure the account is connected and
@@ -55,16 +47,13 @@ class APNSWorker(switchboard.Client):
                 from1 = msg['from'][0]
                 from_name = from1.get('name') or from1.get('email', '<unknown>')
                 notification = "%s - %s" % (from_name, msg['subject'])
-                payload = apns.Payload(notification, sound='default', badge=1)
-                if SEND_APNS:
-                    logger.debug("sending push notification: %s", payload)
-                    try:
-                        self._apns.gateway_server.send_notification(HEX_TOKEN, payload)
-                    except Exception as e:
-                        logger.error("Error sending push notification: %s", e)
-                        raise
-                else:
-                    logger.info("-- push notification would be sent: %s --", payload)
+                logger.debug("sending text message: %s", notification)
+                try:
+                    self._twilio.messages.create(
+                        body=notification, to=self._to, from_=self._from)
+                except Exception as e:
+                    logger.error("Error sending push notification: %s", e)
+                    raise
 
         for resp in resps:
             if resp[0] == 'newMessage':
@@ -79,10 +68,10 @@ class APNSWorker(switchboard.Client):
 
 
 
-def main(url):
+def main(sid, token, to, from_, url):
     """Create, connect, and block on the listener worker."""
     try:
-        worker = APNSWorker(url)
+        worker = APNSWorker(sid=sid, token=token, to=to, from_=from_, url=url)
         worker.connect()
         worker.run_forever()
     except KeyboardInterrupt:
@@ -90,6 +79,10 @@ def main(url):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Loop echo listener")
-    parser.add_argument("--host")
+    parser.add_argument('--host', help="the name of the host (see HOSTS)")
+    parser.add_argument('--sid', required=True, help="the twilio sid")
+    parser.add_argument('--token', required=True, help="the twilio token")
+    parser.add_argument('--to', required=True, help="the destination phone number")
+    parser.add_argument('--from', required=True, help="the source phone number")
     args = parser.parse_args()
-    main(HOSTS[args.host])
+    main(args.sid, args.token, args.to, getattr(args, 'from'), HOSTS[args.host])
