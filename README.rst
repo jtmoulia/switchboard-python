@@ -2,8 +2,10 @@
 Switchboard Python
 ==================
 
-[Switchboard](http://thusfresh.github.io/switchboard) Python provides
-helpers for writing Switchboard workers and clients in Python.
+Switchboard_ Python provides helpers for writing Switchboard workers
+and clients in Python.
+
+.. _Switchboard: http://thusfresh.github.io/switchboard
 
 
 Installation
@@ -27,27 +29,28 @@ This should get you running::
 Usage
 =====
 
-The `switchboard.Client` class is used to interact with both Switchboard
-workers and clients.
+The :code:`switchboard.Client` class is used to interact with both
+Switchboard workers and clients.
 
 Assuming that the Switchboard application is running, the following
 example opens a connection to the server over the worker interface,
-and sends a batch request with a `connect` command (see the
-[interfaces
-guide](http://thusfresh.github.io/switchboard/guide/interfaces) for
-command documentation)::
+and sends a batch request with a :code:`connect` command (see the
+`interfaces guide`_ for command documentation).
+
+.. code:: python
 
     worker = switchboard.Client("ws://127.0.0.1:8080/workers")
     worker.connect()
     worker.send_cmds(("connect", CONN_SPEC))
     worker.run_forever()
 
-To handle command responses, `send_cmds` returns a
-[promise](http://promises-aplus.github.io/promises-spec) that is
-fulfilled by the tuple `(cmds, resps)` when the command's responses
-arrive, where `cmds` is the list of commands given to `send_cmds`, and
-`resps` is the list of responses returned by Switchboard::
+To handle command responses, :code:`send_cmds` returns a promise_ that
+is fulfilled by the tuple :code:`(cmds, resps)` when the command's
+responses arrive, where :code:`cmds` is the list of commands given to
+:code:`send_cmds`, and :code:`resps` is the list of responses returned
+by Switchboard.
 
+.. code:: python
 
     def handle_get_mailboxes((cmds, resps)):
 	print "For cmds", cmds, ", received resps:", resps
@@ -56,9 +59,11 @@ arrive, where `cmds` is the list of commands given to `send_cmds`, and
 
 
 To add commands on connect, and/or handling of unsolicited messages
-subclass the base `switchboard.Client` --  an unsolicited message
-is not sent in response to a command, but when the server has
-new information, such as a new emails arriving::
+subclass the base :code:`switchboard.Client` -- an unsolicited message
+is not sent in response to a command, but when the server has new
+information, such as a new emails arriving
+
+.. code:: python
 
     class TheWorker(switchboard.Client):
 	def opened(self):
@@ -76,13 +81,19 @@ new information, such as a new emails arriving::
     worker.connect()
     worker.run_forever()
 
+.. _interfaces guide: http://thusfresh.github.io/switchboard/guide/interfaces
+.. _promise: http://promises-aplus.github.io/promises-spec
+
 Examples
 ========
 
-All examples are located under `/examples`. Each example uses
-command line arguments which you can investigate via::
+All examples are located under :code:`/examples`. Each example uses
+command line arguments which you can investigate via:
+
+.. code:: shell
 
     ./examples/example.py --help
+
 
 listener.py
 -----------
@@ -90,7 +101,9 @@ listener.py
 This worker provides a simple example of bidirectional communication
 using the Switchboard worker interface. It listens for Switchboard
 to notify it of new emails, then fetches the raw email and parses
-it using the Python `email` module::
+it using the Python :code:`email` module:
+
+.. code:: shell
 
     ./examples/listener.py
 
@@ -98,24 +111,29 @@ it using the Python `email` module::
 apnsworker.py
 -------------
 
-This worker sends new email
-[Apple push notifications](https://developer.apple.com/notifications/)
-to an iOS client given an APNS certificate, key, and pushtoken.
+This worker sends new email `Apple Push Notifications`_ to an iOS
+client given an APNS certificate, key, and pushtoken.
 
 Note: it *does not* map from account to push token when sending push
 notifications -- it only sends the push notifications using the
-provided push token::
+provided push token:
+
+.. code:: shell
 
     ./examples/apnsworker.py --cert "path/to/cert.pem" --key "path/to/key.pem" --pushtoken "target users hex pushtoken"
+
+.. _Apple Push Notifications: https://developer.apple.com/notifications/
 
 
 twilioworker.py
 ---------------
 
-This worker is similar to `apnsworker.py`, except instead of sending
+This worker is similar to :code:`apnsworker.py`, except instead of sending
 APNs when a new email arrives, it sends a text message via
-[Twilio](https://twilio.com)::
+Twilio_:
+
+.. code:: shell
 
     ./examples/twilioworker.py --sid "twilio sid" --token "twilio token" --to "to phone #" --from "from phone #"
 
-
+.. _Twilio: https://twilio.com
