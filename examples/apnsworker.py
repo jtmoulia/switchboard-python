@@ -17,7 +17,6 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-HOSTS = {'localhost': 'ws://127.0.0.1:8080/workers'}
 ACCOUNT = 'mail.dispatch.test@gmail.com'
 CONN_SPEC = {'host': 'imap.gmail.com',
              'port': 993,
@@ -38,12 +37,10 @@ class APNSWorker(switchboard.Client):
         self._pushtoken = pushtoken
         self._apns = apns.APNs(use_sandbox=use_sandbox, cert_file=cert, key_file=key)
 
-    def connect(self):
+    def opened(self):
         """Connect to the websocket, and ensure the account is connected and
         the INBOX is being watched, and then start watchingAll.
         """
-        super(APNSWorker, self).connect()
-
         def post_setup((cmds, resps)):
             """Post setup callback."""
             logger.info("Setup complete, listening...")
@@ -101,9 +98,13 @@ def main(cert, key, pushtoken, url):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="APNS Worker")
-    parser.add_argument("--cert", default="cert.pem")
-    parser.add_argument("--key", default="key.pem")
-    parser.add_argument("--pushtoken", default=None)
-    parser.add_argument("--host", default="localhost")
+    parser.add_argument("--cert", default="cert.pem",
+                        help="the APNS public certificate")
+    parser.add_argument("--key", default="key.pem",
+                        help="the APNS private key")
+    parser.add_argument("--pushtoken", default=None,
+                        help="the push token to send emails to")
+    parser.add_argument("--url", default="ws://127.0.0.1:8080/workers",
+                        help="the url of the worker websocket interface")
     args = parser.parse_args()
-    main(args.cert, args.key, args.pushtoken, HOSTS[args.host])
+    main(args.cert, args.key, args.pushtoken, args.url)

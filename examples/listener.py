@@ -10,7 +10,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-HOSTS = {'localhost': 'ws://127.0.0.1:8080/workers'}
 ACCOUNT = 'mail.dispatch.test@gmail.com'
 CONN_SPEC = {'host': 'imap.gmail.com',
              'port': 993,
@@ -27,12 +26,10 @@ class ListenerWorker(switchboard.Client):
     """
 
 
-    def connect(self):
+    def opened(self):
         """Connect to the websocket, and ensure the account is connected and
         the INBOX is being watched, and then start watchingAll.
         """
-        super(ListenerWorker, self).connect()
-
         def post_setup((cmds, resps)):
             """Post setup callback."""
             logger.info("Setup complete, listening...")
@@ -75,6 +72,6 @@ def main(url):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Loop echo listener")
-    parser.add_argument("--host", default="localhost")
+    parser.add_argument("--url", default="ws://127.0.0.1:8080/workers")
     args = parser.parse_args()
-    main(HOSTS[args.host])
+    main(args.url)
