@@ -1,4 +1,12 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+"""
+
+__author__ = u"Thomas Moulia <jtmoulia@pocketknife.io>"
+__copyright__ = u"Copyright © 2014, ThusFresh, Inc. All rights reserved."
+
 
 import switchboard
 import thread
@@ -19,15 +27,16 @@ CONN_SPEC = {'host': 'imap.gmail.com',
                  'password': 'i>V99JuMVEs;'}};
 
 
-class ListenerWorker(switchboard.Client):
-    """A basic Switchboard worker that will listen for new email
+class ListenerWorker(switchboard.Fetcher):
+    """
+    A basic Switchboard worker that will listen for new email
     notifications.  When it receives a notification, it fetches the
     raw email from Switchboard and parses it using the email module.
     """
 
-
     def opened(self):
-        """Connect to the websocket, and ensure the account is connected and
+        """
+        Connect to the websocket, and ensure the account is connected and
         the INBOX is being watched, and then start watchingAll.
         """
         def post_setup((cmds, resps)):
@@ -39,26 +48,12 @@ class ListenerWorker(switchboard.Client):
                                            'list': ['INBOX']}),
                        ('watchAll', {})).then(post_setup)
 
-
-    def received_unsolicited(self, resps):
-        def post_fetch((cmds, resps)):
-            """Post fetch callback."""
-            for raw_msg in resps[0][1]['list']:
-                msg = email.message_from_string(raw_msg['raw'])
-                logger.info("Subject: %s, From: %s, To: %s",
-                            msg['subject'], msg['from'], msg['to'])
-
-        for resp in resps:
-            if resp[0] == 'newMessage':
-                args = resp[1]
-                self.send_cmds(('getMessages',
-                                {'account': args['account'],
-                                 'ids': [args['messageId']],
-                                 'properties': ['raw']})).then(post_fetch)
-
-            else:
-                logger.warning("Unknown unsolicted response: %s", response)
-
+    def received_new(self, msg):
+        """
+        Called when a new message is received.
+        """
+        logger.info("Subject: %s, From: %s, To: %s",
+                    msg['subject'], msg['from'], msg['to'])
 
 
 def main(url):

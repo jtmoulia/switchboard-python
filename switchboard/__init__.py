@@ -1,15 +1,26 @@
 # -*- coding: utf-8 -*-
 
+"""
+A Switchboard worker/client implementation.
+"""
+
+__author__ = u"Thomas Moulia <jtmoulia@pocketknife.io>"
+__copyright__ = u"Copyright © 2014, ThusFresh, Inc. All rights reserved."
+
+
+
 from ws4py.client.threadedclient import WebSocketClient
 import aplus
 import json
+import email
 
 import logging
 logger = logging.getLogger(__name__)
 
 
 class Client(WebSocketClient):
-    """Base behavior shared between workers and clients.
+    """
+    Base behavior shared between workers and clients.
     """
 
     def __init__(self, *args, **kwargs):
@@ -21,17 +32,23 @@ class Client(WebSocketClient):
     # ---------------------
 
     def opened(self):
-        """Handle the websocket opening."""
+        """
+        Handle the websocket opening.
+        """
         logger.debug("Connection is open....")
 
     def closed(self, code, reason=None):
-        """Handle the websocket closing."""
+        """
+        Handle the websocket closing.
+        """
         logger.debug("Connection has closed: %s - %s.", code, reason)
 
     def received_message(self, msg):
-        """Handle receiving a message by checking whether it is in response
+        """
+        Handle receiving a message by checking whether it is in response
         to a command or unsolicited, and dispatching it to the appropriate
-        object method."""
+        object method.
+        """
         logger.debug("Received message: %s", msg)
         if msg.is_binary:
             raise ValueError("Binary messages not supported")
@@ -48,21 +65,26 @@ class Client(WebSocketClient):
     # ---------
 
     def received_unsolicited(self, response):
-        """Handle a unsolicited response."""
+        """
+        Handle a unsolicited response.
+        """
         logger.debug("Received unsolicited message: %s", response)
 
     # Public Interface
     # ----------------
 
     def _tag_cmds(self, *cmds):
-        """Yields tagged commands."""
+        """
+        Yields tagged commands.
+        """
         for (method, args) in cmds:
             tagged_cmd = [method, args, self._tag]
             self._tag = self._tag + 1
             yield tagged_cmd
 
     def send_cmds(self, *cmds):
-        """Tags and sends the commands to the Switchboard server, returning
+        """
+        Tags and sends the commands to the Switchboard server, returning
         None.
 
         Each cmd be a 2-tuple where the first element is the method name,
@@ -78,8 +100,9 @@ class Client(WebSocketClient):
         return promise
 
 
-class FetcherWorker(Client):
-    """A basic Switchboard worker that will listen for new email
+class Fetcher(Client):
+    """
+    A basic Switchboard worker that will listen for new email
     notifications.  When it receives a notification, it fetches the
     raw email from Switchboard and parses it using the email module.
     """
@@ -102,7 +125,9 @@ class FetcherWorker(Client):
                 logger.warning("Unknown unsolicted response: %s", response)
 
     def received_new(self, msg):
-        """Override this message to handle new emails."""
+        """
+        Override this message to handle new emails.
+        """
         raise NotImplementedError
 
 

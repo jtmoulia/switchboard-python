@@ -1,9 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+A worker which collects messages from Switchboard and sends a text
+message via Twilio to the provided mobile number.
+
+  ./twilioworker.py --help
+"""
+
+__author__ = u"Thomas Moulia <jtmoulia@pocketknife.io>"
+__copyright__ = u"Copyright © 2014, ThusFresh, Inc. All rights reserved."
+
+
+
 import twilio.rest
 import switchboard
-import argparse
 
 import logging
 logging.basicConfig(level=logging.INFO)
@@ -74,6 +85,7 @@ def main(sid, token, to, from_, url):
         worker.close()
 
 if __name__ == '__main__':
+    import argparse
     parser = argparse.ArgumentParser(description="Switchboard Twilio Worker")
     parser.add_argument('--sid', required=True, help="the twilio sid")
     parser.add_argument('--token', required=True, help="the twilio token")

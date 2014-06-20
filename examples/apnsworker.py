@@ -9,6 +9,10 @@ an iOS device.
     ./apnsworker.py --help
 """
 
+__author__ = u"Thomas Moulia <jtmoulia@pocketknife.io>"
+__copyright__ = u"Copyright © 2014, ThusFresh, Inc. All rights reserved."
+
+
 import apns
 import switchboard
 import argparse
