@@ -38,9 +38,9 @@ class LamsonWorker(switchboard.Fetcher):
         """
         As new messages arrive, deliver them to the lamson relay.
         """
-        logger.info("RECEIVING")
-        #logger.debug("Relaying msg to lamson: From: %s, To: %s",
-        #             msg['From'], msg['To'])
+        logger.info("Receiving msg, delivering to Lamson...")
+        logger.debug("Relaying msg to lamson: From: %s, To: %s",
+                     msg['From'], msg['To'])
         self._relay.deliver(msg)
 
 
