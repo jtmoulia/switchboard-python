@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-This Switchboard worker forwards emails into Lamson.
+This Switchboard worker delivers emails to Lamson.
 """
 
 __author__ = u"Thomas Moulia <jtmoulia@pocketknife.io>"
