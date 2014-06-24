@@ -11,7 +11,11 @@ and clients in Python.
 Installation
 ============
 
-This should get you running::
+It's simplest to install this library from [PyPi](https://pypi.python.org/pypi):
+
+    pip install switchboard-python
+
+To build from source:
 
     # Building
     ./setup.py build

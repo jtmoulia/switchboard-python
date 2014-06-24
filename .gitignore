@@ -1,5 +1,6 @@
-build
-switchboard.egg-info
+dist/
+build/
+*.egg-info
 
 *.pyc
 
