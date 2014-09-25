@@ -67,6 +67,6 @@ def main(url):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Loop echo listener")
-    parser.add_argument("--url", default="ws://127.0.0.1:8080/workers")
+    parser.add_argument("--url", default="ws://192.168.50.2:8080/workers")
     args = parser.parse_args()
     main(args.url)

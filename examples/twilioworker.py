@@ -91,7 +91,7 @@ if __name__ == '__main__':
     parser.add_argument('--token', required=True, help="the twilio token")
     parser.add_argument('--to', required=True, help="the destination phone number")
     parser.add_argument('--from', required=True, help="the source phone number")
-    parser.add_argument('--url', default="ws://127.0.0.1:8080/workers",
+    parser.add_argument('--url', default="ws://192.168.50.2:8080/workers",
                         help="the url of the worker websocket interface")
     args = parser.parse_args()
     main(args.sid, args.token, args.to, getattr(args, 'from'), args.url)

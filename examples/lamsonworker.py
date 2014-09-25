@@ -62,7 +62,7 @@ def main(url, lamson_host, lamson_port, lamson_debug):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description="Switchboard -> Lamson Worker")
-    parser.add_argument('--url', default="ws://127.0.0.1:8080/workers",
+    parser.add_argument('--url', default= "ws://192.168.50.2:8080/workers",
                         help="switchboard's websocket url")
     parser.add_argument('--host', default='127.0.0.1',
                         help="lamson's host")

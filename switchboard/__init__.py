@@ -8,14 +8,14 @@ __author__ = u"Thomas Moulia <jtmoulia@pocketknife.io>"
 __copyright__ = u"Copyright © 2014, ThusFresh, Inc. All rights reserved."
 
 
-
 from ws4py.client.threadedclient import WebSocketClient
 import aplus
 import json
 import email
-
 import logging
+
 logger = logging.getLogger(__name__)
+logger.error("HEYY")
 
 
 class Client(WebSocketClient):
@@ -59,7 +59,11 @@ class Client(WebSocketClient):
             (cmds, promise) = self._cmd_groups[cmd_group]
             promise.fulfill((cmds, resps))
         else:
-            self.received_unsolicited(resps)
+            try:
+                self.received_unsolicited(resps)
+            except:
+                logger.exception("Error in unsolicited msg handler")
+                raise
 
     # Callbacks
     # ---------
@@ -135,7 +139,8 @@ class Fetcher(Client):
 ## =======
 
 def _take(d, key, default=None):
-    """If the key is present in dictionary, remove it and return it's
+    """
+    If the key is present in dictionary, remove it and return it's
     value. If it is not present, return None.
     """
     if key in d:
@@ -147,7 +152,8 @@ def _take(d, key, default=None):
 
 
 def _get_cmds_id(*cmds):
-    """Returns an identifier for a group of partially tagged commands.
+    """
+    Returns an identifier for a group of partially tagged commands.
     If there are no tagged commands, returns None.
     """
     tags = [cmd[2] if len(cmd) == 3 else None for cmd in cmds]

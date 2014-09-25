@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='switchboard-python',
-      version='0.1.2',
+      version='0.1.3',
       author='jtmoulia',
       author_email='jtmoulia@pocketknife.io',
       description='Python switchboard utilites',

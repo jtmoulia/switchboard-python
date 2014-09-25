@@ -108,7 +108,7 @@ if __name__ == '__main__':
                         help="the APNS private key")
     parser.add_argument("--pushtoken", default=None,
                         help="the push token to send emails to")
-    parser.add_argument("--url", default="ws://127.0.0.1:8080/workers",
+    parser.add_argument("--url", default= "ws://192.168.50.2:8080/workers",
                         help="the url of the worker websocket interface")
     args = parser.parse_args()
     main(args.cert, args.key, args.pushtoken, args.url)

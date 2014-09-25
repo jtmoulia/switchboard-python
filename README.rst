@@ -43,7 +43,7 @@ and sends a batch request with a :code:`connect` command (see the
 
 .. code:: python
 
-    worker = switchboard.Client("ws://127.0.0.1:8080/workers")
+    worker = switchboard.Client("ws://192.168.50.2:8080/workers")
     worker.connect()
     worker.send_cmds(("connect", CONN_SPEC))
     worker.run_forever()
