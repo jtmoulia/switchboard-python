@@ -11,11 +11,15 @@ and clients in Python.
 Installation
 ============
 
-It's simplest to install this library from [PyPi](https://pypi.python.org/pypi):
+It's simplest to install this library from PyPi_:
+
+.. code:: bash
 
     pip install switchboard-python
 
 To build from source:
+
+.. code:: bash
 
     # Building
     ./setup.py build
@@ -29,6 +33,7 @@ To build from source:
     # Actual install
     pip install .
 
+.. _PyPi: https://pypi.python.org/pypi
 
 Usage
 =====
